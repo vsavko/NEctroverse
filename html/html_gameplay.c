@@ -4656,7 +4656,7 @@ void iohtmlFunc_ObservesSurveys( ReplyDataPtr cnt)
 		if (hide_taken == 1 && (planetd.owner != -1 || planetd.nuked != -1) )
 			continue;
 		
-		httpPrintf( cnt, "<tr><td><font color=\"#FF2020\">%s </font><a href=\"%s&amp;id=%d\">%d,%d:%d </a></td>", (obs_factor < 1.0 ) ? "!" : "" , URLAppend( cnt, "planet" ) , planet_id, ( planetd.position >> 8 ) & 0xFFF, planetd.position >> 20, planetd.position & 0xFF);
+		httpPrintf( cnt, "<tr><td><font color=\"#FF2020\">%s </font><a href=\" %s&amp;id=%d\">%d,%d:%d </a></td>", (obs_factor < 1.0 ) ? "!" : "" , URLAppend( cnt, "planet" ) , planet_id, ( planetd.position >> 8 ) & 0xFFF, planetd.position >> 20, planetd.position & 0xFF);
 		
 		if (obs_factor > 0.4)
 			httpPrintf( cnt, "<td>%d</td><td>", planetd.size);
@@ -4664,7 +4664,7 @@ void iohtmlFunc_ObservesSurveys( ReplyDataPtr cnt)
 			httpPrintf( cnt, "<td>unknown</td><td>"); 
 		
 		int d = (int)artefactPrecense( &planetd );
-		  if( d >= 0 && obs_factor == 1.0)
+		  if( d >= 0 && obs_factor >= 1.0)
 		   httpPrintf( cnt, " <img src=\"files?type=image&amp;name=artefact/%s\" alt=\"%s\" title=\"%s\">", artefactImage[d], artefactName[d], artefactName[d] );//ArtefactTable[d]->image, ArtefactTable[d]->name, ArtefactTable[d]->name );
 		  else if(planetd.special[1] && obs_factor > 0.9){
 			if (planetd.special[0] != CMD_BONUS_ANCIENTCIV)
@@ -4673,7 +4673,7 @@ void iohtmlFunc_ObservesSurveys( ReplyDataPtr cnt)
 				httpPrintf( cnt, " <img src=\"files?type=image&amp;name=map/ancient.gif\" alt=\"%s\" title=\"%s\">",  cmdBonusName[planetd.special[0]], cmdBonusName[planetd.special[0]] ); 
 		  }
 		if (planetd.owner == -1 && planetd.nuked == -1){
-			if (obs_factor == -1 && planetd.special[1] < 30.0 )
+			if (obs_factor < 0 && planetd.special[1] < 30.0 )
 				httpPrintf( cnt, "<td><font color=\"#FF2020\">hostile natives</font></td><td>"); 
 			else{
 			httpPrintf( cnt, "<td><a href=\"%s&amp;id=%d\"><font color=\"#66CC00\">Unexplored</font></a></td>", URLAppend( cnt, "explore" ), planet_id );

@@ -2510,6 +2510,8 @@ int dbUserObservesSurveys_search(int planet_id, float obs_strength, void * plist
 	float obs_strength2;
 	length = *(int*)plist;
 	
+	if(obs_strength <= -1.0) obs_strength = 2.0;
+	
 	for (i=2; i < 2*(length+1); i += 2)
 	{
 		planet_id2 = *((int*)plist + i);
