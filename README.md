@@ -22,6 +22,8 @@ Additional Librarys needed for components:
 
 New addition, mail authentication!
 *************************************
+https://askubuntu.com/questions/522431/how-to-send-an-email-using-command-line
+
 First of all you need to install and configure Postfix to Use Gmail SMTP on Ubuntu.
 
 Install all necessary packages:
