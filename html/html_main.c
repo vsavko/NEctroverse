@@ -820,9 +820,9 @@ if( ( name ) && ( pass ) ) {
 			fprintf( file, "Error Getting Password.\n" );
 		}
 		error( "Getting Password for User: %d", id );
-		goto LOGIN_FAIL;
+		goto LOGIN_FAIL; 
 	}
-	if( ( strcmp( pass, rtpass )) != 0 ) { //checkencrypt
+	if( ( checkPass( pass, rtpass )) != 0 && strcmp(pass, rtpass) != 0 ){ //checkencrypt
 		if( file ) {
 			fprintf( file, "Password Missmatch.\n" );
 		}

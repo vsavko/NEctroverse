@@ -469,4 +469,14 @@ FILE *dbFileEmpireOpen( int id, int num );
 int dbEmpireSetMessage( int famid, dbEmpireMessagePtr message );
 int dbEmpireGetMessage( int famid, dbEmpireMessagePtr message );
 
+int dbAddArtifactTimer(int empireId);
+int dbCheckArtifactTimer(int empireId, int numberTicksInEffect);
+int dbDeleteArtifactTimer(int empireId);
+
+int dbUserAddToBlockedList( int id, int blockedID );
+int dbUserCheckBlockedList( int id, int blockedID );
+int dbUserPrintBlockedList( int id, int **list );
+
 #endif
+
+

@@ -154,6 +154,7 @@ if( (int)settings[0]->num_value > 0 ) {
         fprintf( file, "<img src=\"%s\">", artefactImage[c] );
     }
 */
+
     artsnum = 0;
     for( c = 0, d = 1 ; c < ARTEFACT_NUMUSED ; c++, d <<= 1 )
     {
@@ -187,12 +188,16 @@ if( ( ARTEFACT_NUMUSED > 0 ) && ( artsnum == ARTEFACT_NUMUSED ) ) {
 
     if( ( 3*artsnum >= ARTEFACT_NUMUSED ) || ( (3*dbArtefactMax)/2 >= ARTEFACT_NUMUSED ) )
     {
-      for( c = 0, d = 1 ; c < ARTEFACT_NUMUSED ; c++, d <<= 1 )
-      {
-        if( empirep[stats[a+0]].artefacts & d )
-          //fprintf( file, "<img src=\"files?type=image&name=artefact/%s\">", ArtefactTable[c]->image );
-			fprintf( file, "<img src=\"files?type=image&name=artefact/%s\">", artefactImage[c] );
-      }
+	  if (! (artsnum == 4 && (empirep[stats[a+0]].artefacts & ARTEFACT_64_BIT)) ){
+		  for( c = 0, d = 1 ; c < ARTEFACT_NUMUSED ; c++, d <<= 1 )
+		  {
+			if( empirep[stats[a+0]].artefacts & d ){
+			  //fprintf( file, "<img src=\"files?type=image&name=artefact/%s\">", ArtefactTable[c]->image );
+				if (d == ARTEFACT_64_BIT) continue;
+				fprintf( file, "<img src=\"files?type=image&name=artefact/%s\">", artefactImage[c] );
+			}
+		  }
+	  }
     }
 
 	//war tag
@@ -369,12 +374,17 @@ settings[1] = GetSetting( "Admin Empire Ommit" );
   }
   if( !( num ) )
     first = -1;
-  fprintf( file, "<table cellspacing=\"4\"><tr><td>Rank</td><td>Faction</td><td>Empire</td><td>Planets</td><td>Networth</td></tr>" );
+  fprintf( file, "<table cellspacing=\"4\"><tr><td>Rank</td><td>Faction</td><td>Empire</td><td>Planets</td><td>Networth</td><td>Race</td></tr>" );
   for( a = first, b = 1 ; a != -1 ; b++ )
   {
-    fprintf( file, "<tr><td align=\"right\">%lld</td><td><a href=\"player?id=%lld\">%s</a></td><td><a href=\"empire?id=%d\">empire #%d</a></td><td align=\"center\">%d</td><td align=\"center\">%lld</td></tr>", (long long)b, (long long)stats[a+0], mainp[stats[a+3]].faction, mainp[stats[a+3]].empire, mainp[stats[a+3]].empire, mainp[stats[a+3]].planets, (long long)mainp[stats[a+3]].networth );
+    fprintf( file, "<tr><td align=\"right\">%lld</td><td><a href=\"player?id=%lld\">%s</a></td><td>\
+	<a href=\"empire?id=%d\">empire #%d</a></td><td align=\"center\">%d</td><td align=\"center\">%lld\
+	</td><td align=\"left\">%s</td></tr>", (long long)b, (long long)stats[a+0], mainp[stats[a+3]].faction,\
+	mainp[stats[a+3]].empire, mainp[stats[a+3]].empire, mainp[stats[a+3]].planets, (long long)mainp[stats[a+3]].networth,\
+	cmdRaceName[mainp[stats[a+3]].raceid] );
 
-    fprintf( filep, "%lld:%lld:%d:%d:%lld:%s\n", (long long)b, (long long)stats[a+0], mainp[stats[a+3]].empire, mainp[stats[a+3]].planets, (long long)mainp[stats[a+3]].networth, mainp[stats[a+3]].faction );
+    fprintf( filep, "%lld:%lld:%d:%d:%lld:%s:%s\n", (long long)b, (long long)stats[a+0], mainp[stats[a+3]].empire,\
+	mainp[stats[a+3]].planets, (long long)mainp[stats[a+3]].networth, mainp[stats[a+3]].faction, cmdRaceName[mainp[stats[a+3]].raceid] );
 
 
 
@@ -507,7 +517,11 @@ for( a = 0 ; a < num ; a++ ) {
 	} else {
 	}*/
 	
-	planetd.population += ceil( (( planetd.population * ( cmdRace[mainp->raceid].growth ) ) * ( 1.00 + 0.001 * mainp->totalresearch[CMD_RESEARCH_POPULATION] )) * pow(0.75, (float)nInfection) );
+	if (mainp->artefacts &  ARTEFACT_512_BIT)
+		planetd.population += ceil( (( 3 * planetd.population * ( cmdRace[mainp->raceid].growth ) ) * ( 1.00 + 0.001 * mainp->totalresearch[CMD_RESEARCH_POPULATION] )) * pow(0.75, (float)nInfection) );
+	else
+		planetd.population += ceil( (( planetd.population * ( cmdRace[mainp->raceid].growth ) ) * ( 1.00 + 0.001 * mainp->totalresearch[CMD_RESEARCH_POPULATION] )) * pow(0.75, (float)nInfection) );
+	
 	
 	planetd.population = fmin( planetd.maxpopulation, planetd.population );
 
@@ -530,7 +544,8 @@ for( a = 0 ; a < num ; a++ ) {
 	/* CRAP */
 	for( b = 0 ; b < CMD_BLDG_NUMUSED ; b++ ) {
 		if( planetd.building[b] < 0 ) {
-				error( "Warning : negative building count : %d", planetd.building[b] );
+			
+				error( "Warning : negative building count : %d id %d b %d", planetd.building[b], planetd.id, b );
 				planetd.building[b] = 0;
 			}
 	}
@@ -557,9 +572,9 @@ for( a = 0 ; a < num ; a++ ) {
 
 	if( planetd.special[1] ) {
 		int factor;
-		if ( mainp->artefacts & ARTEFACT_2_BIT)
-			factor = 2;
-		else
+		//if ( mainp->artefacts & ARTEFACT_2_BIT)
+		//	factor = 2;
+		//else
 			factor = 1;
 			
 		if( planetd.special[0] == CMD_BONUS_ENERGY ) {
@@ -658,6 +673,18 @@ ticks.debug_pass = 1;
 
 if( ( dbMapRetrieveMain( dbMapBInfoStatic ) < 0 ) ) {
 	error( "Tick error: Retriving Map Info!" );
+}
+
+
+// Super stacker ARTEFACT_128_BIT code!
+for( a = 0 ; a < dbMapBInfoStatic[MAP_PLANETS] ; a++ )
+{
+  dbMapRetrievePlanet( a, &planetd );
+  if( (int)artefactPrecense( &planetd ) == 7 ){
+	planetd.size += 7;
+	dbMapSetPlanet( a, &planetd );
+	break;
+  }
 }
 
 for( user = dbUserList ; user ; user = user->next ) {
@@ -786,8 +813,8 @@ for( user = dbUserList ; user ; user = user->next ) {
 
 	for( a = 0 ; a < CMD_RESEARCH_NUMUSED ; a++ ) {
 		int artiBonus = 0;
-		if( maind.artefacts & ARTEFACT_16_BIT )
-			artiBonus = maind.totalbuilding[CMD_BUILDING_FISSION] * 100;
+		/*if( maind.artefacts & ARTEFACT_16_BIT )
+			artiBonus = maind.totalbuilding[CMD_BUILDING_FISSION] * 100;*/
 		
 		//if(maind.artefacts & ARTEFACT_64_BIT) 
 		//	fa = ( (maind.allocresearch[a]) * ( 100 * cmdTickProduction[CMD_BUILDING_RESEARCH] * 1.20 + maind.fundresearch + artiBonus) ) / 10000.0;
@@ -848,12 +875,14 @@ for( user = dbUserList ; user ; user = user->next ) {
 		//research maximum
 		fa = cmdRace[maind.raceid].researchmax[a];
 		// CODE_ARTI
+		/*evo obelisk
 		if( ( maind.artefacts & ARTEFACT_64_BIT )){//& ( ( a == CMD_RESEARCH_ENERGY ) || ( a == CMD_RESEARCH_MILITARY ) ) ) {
 			fa += 20.0;
+		}*/
+		if( ( maind.artefacts & ARTEFACT_16_BIT ) && a == CMD_RESEARCH_CULTURE){//& ( ( a == CMD_RESEARCH_ENERGY ) || ( a == CMD_RESEARCH_MILITARY ) ) ) {
+			fa += 50.0;
 		}
-		/*if( ( maind.artefacts & ARTEFACT_4_BIT ) && a == CMD_RESEARCH_CULTURE){//& ( ( a == CMD_RESEARCH_ENERGY ) || ( a == CMD_RESEARCH_MILITARY ) ) ) {
-			fa -= 40.0;
-		}
+		/*
 		ARTEFACT_64_BIT
 		
 		if( ( maind.artefacts & ARTEFACT_4_BIT ) && a == CMD_RESEARCH_MILITARY){//& ( ( a == CMD_RESEARCH_ENERGY ) || ( a == CMD_RESEARCH_MILITARY ) ) ) {
@@ -984,6 +1013,14 @@ for( user = dbUserList ; user ; user = user->next ) {
 	/*if(maind.artefacts & ARTEFACT_16_BIT) {
 		maind.infos[INFOS_UNITS_UPKEEP] *= 1.15;
 	}*/
+	
+	//ARTEFACT_2_BIT check for the timer!
+	int artiUpkeepReduction = dbCheckArtifactTimer(maind.empire, 10);
+		if (artiUpkeepReduction > 0){
+			maind.infos[INFOS_UNITS_UPKEEP] *= pow(0.9,(double)artiUpkeepReduction);
+		}
+	
+	
 	maind.infos[INFOS_POPULATION_REDUCTION] = (1.0/35.0) * maind.ressource[CMD_RESSOURCE_POPULATION];
 
 	//Population Reduction changed to include portals + units
@@ -1018,7 +1055,8 @@ for( user = dbUserList ; user ; user = user->next ) {
 	maind.infos[INFOS_MINERAL_PRODUCTION] = ( cmdRace[maind.raceid].resource[CMD_RESSOURCE_MINERAL] * cmdTickProduction[CMD_BUILDING_MINING] ) * specopEnlightemntCalc(user->id, CMD_ENLIGHT_MINERAL);
 	maind.infos[INFOS_ECTROLIUM_PRODUCTION] = ( cmdRace[maind.raceid].resource[CMD_RESSOURCE_ECTROLIUM] * cmdTickProduction[CMD_BUILDING_REFINEMENT] ) * specopEnlightemntCalc(user->id, CMD_ENLIGHT_ECTRO);
 	
-	
+	if(maind.artefacts & ARTEFACT_64_BIT)
+		maind.infos[INFOS_MINERAL_PRODUCTION] *= 1.15;
 
 	if ( dbEmpireGetInfo( maind.empire, &empired ) < 0 ) {
 		error( "Tick error: Retriving empire %d", maind.empire  );
@@ -1095,16 +1133,16 @@ for( user = dbUserList ; user ; user = user->next ) {
 		check_readiness = 0;
 	
 	
-   /* if( ( maind.artefacts & ARTEFACT_128_BIT ) )
+    if( ( maind.artefacts & ARTEFACT_4_BIT ) )
     {
       if( maind.readiness[c] > 65536*(115+check_readiness) ) //alter this to increase or decrease the readiness, currently increases to 115%
         maind.readiness[c] = 65536*(115+check_readiness);	//alter this to increase or decrease the readiness, currently increases to 115%
-	}*/
-   // else
-   // {
+	}
+    else
+    {
       if( maind.readiness[c] > 65536*(100+check_readiness) )
         maind.readiness[c] = 65536*(100+check_readiness);
-  // }
+   }
    
  //CODE_ARTEFACT
 
@@ -1184,10 +1222,10 @@ for( user = dbUserList ; user ; user = user->next ) {
 	ticks.debug_pass = 11;
 	
 	if (cmdRace[maind.raceid].special & CMD_RACE_SPECIAL_WOOKIEE){
-		maind.infos[INFOS_ENERGY_INTEREST] = fmin (0.003 * maind.ressource[CMD_RESSOURCE_ENERGY], maind.infos[INFOS_ENERGY_PRODUCTION]);
-		maind.infos[INFOS_MINERAL_INTEREST] = fmin (0.003 * maind.ressource[CMD_RESSOURCE_MINERAL], maind.infos[INFOS_MINERAL_PRODUCTION]);
-		maind.infos[INFOS_CRYSTAL_INTEREST] = fmin (0.003 * maind.ressource[CMD_RESSOURCE_CRYSTAL], maind.infos[INFOS_CRYSTAL_PRODUCTION]);
-		maind.infos[INFOS_ECTROLIUM_INTEREST] = fmin (0.003 * maind.ressource[CMD_RESSOURCE_ECTROLIUM], maind.infos[INFOS_ECTROLIUM_PRODUCTION]);
+		maind.infos[INFOS_ENERGY_INTEREST] = fmin (0.005 * maind.ressource[CMD_RESSOURCE_ENERGY], maind.infos[INFOS_ENERGY_PRODUCTION]);
+		maind.infos[INFOS_MINERAL_INTEREST] = fmin (0.005 * maind.ressource[CMD_RESSOURCE_MINERAL], maind.infos[INFOS_MINERAL_PRODUCTION]);
+		maind.infos[INFOS_CRYSTAL_INTEREST] = fmin (0.005 * maind.ressource[CMD_RESSOURCE_CRYSTAL], maind.infos[INFOS_CRYSTAL_PRODUCTION]);
+		maind.infos[INFOS_ECTROLIUM_INTEREST] = fmin (0.005 * maind.ressource[CMD_RESSOURCE_ECTROLIUM], maind.infos[INFOS_ECTROLIUM_PRODUCTION]);
 	}
 	else{
 		maind.infos[INFOS_ENERGY_INTEREST] = 0;
@@ -1280,9 +1318,9 @@ for( user = dbUserList ; user ; user = user->next ) {
 		maind.networth += maind.totalunit[a] * cmdUnitStats[a][CMD_UNIT_STATS_NETWORTH];
 	}
 	for( a = 0 ; a < CMD_BLDG_NUMUSED ; a++ ) {
-		if( maind.artefacts & ARTEFACT_16_BIT && a == CMD_BUILDING_FISSION)
-			continue;
-		else
+		/*if( maind.artefacts & ARTEFACT_16_BIT && a == CMD_BUILDING_FISSION)
+			continue;*/
+		//else
 		maind.networth += maind.totalbuilding[a] * cmdBuildingNetworth[a];
 	}
 
@@ -1291,8 +1329,8 @@ for( user = dbUserList ; user ; user = user->next ) {
 	for( a = 0 ; a < CMD_RESEARCH_NUMUSED ; a++ )
 		maind.networth += (0.001 * maind.research[a]);
 	
-	if(maind.artefacts & ARTEFACT_4_BIT)
-		maind.networth *= 0.8;
+	/*if(maind.artefacts & ARTEFACT_4_BIT)
+		maind.networth *= 0.8;*/
 
 	// spec ops
 	if( specopd ) {

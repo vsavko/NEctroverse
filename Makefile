@@ -8,7 +8,8 @@ CONFIGS := $(shell cat config/buildflags.h)
 OBJDIR := .libs
 OBJS := $(addprefix $(OBJDIR)/,main.o io.o http.o db.o cmd.o html.o map.o artefact.o extras.o )
 #The standard config needed to compile basic server, withought these it won't work.
-FLAGS = -O2 -O3 --fast-math -Wall #-Wextra
+#FLAGS = -O2 -O3 --fast-math -Wall #-Wextra -g
+FLAGS = -O0 -g --fast-math -Wall #-Wextra 
 LIBS = -lcrypt -lpng
 
 

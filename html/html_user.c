@@ -3,14 +3,16 @@
 
 void iohtmlFunc_account( ReplyDataPtr cnt ) {
 	int a, id, race_change_time = 144;
-	char *faction, *race, *desc;
+	char *faction, *race, *desc, *block;
 	char description[USER_DESC_MAX];
 	dbUserMainDef maind;
 	dbUserInfoDef infod;
+	int tmp;
 
 faction = iohtmlVarsFind( cnt, "newname" );
 race = iohtmlVarsFind( cnt, "race" );
 desc = iohtmlVarsFind( cnt, "desc" );
+block = iohtmlVarsFind( cnt, "block" );
 
 iohtmlBase( cnt, 1 );
 
@@ -72,6 +74,17 @@ if( desc ) {
 		httpString( cnt, "<i>Error encountered while changing Description</i><br><br>" );
 }
 
+if( block ) {
+	if (dbUserLinkID(atoi(block)) == NULL)
+		httpString( cnt, "<i>Player with this ID doesn't exist!</i><br><br>" );
+	else{
+		if( (tmp = dbUserAddToBlockedList( id, atoi(block) )) >= 0 )
+			httpPrintf( cnt, "<i>User %d %s</i><br><br>", atoi(block), (tmp == 1 ) ?"blocked" : "unblocked" );
+		else
+			httpString( cnt, "<i>Error encountered while adding a user to the blocked list</i><br><br>" );
+	}
+}
+
 httpString( cnt, "<table border=\"0\"><tr><td>" );
 httpPrintf( cnt, "Account ID : <b>%d</b><br>", id );
 #if FACEBOOK_SUPPORT
@@ -123,10 +136,32 @@ if( ticks.status | ticks.number && roundspec_define[ROUNDSPEC_RACECHANGE] == 1) 
 iohttpForumFilter3( description, infod.desc, USER_DESC_MAX );
 httpString( cnt, "<br>" );
 httpPrintf( cnt, "<form action=\"%s\" method=\"POST\"><i>Faction description</i><br>", URLAppend( cnt, "account" ) );
-httpString( cnt, "<textarea name=\"desc\" wrap=\"soft\" rows=\"4\" cols=\"64\">" );
+httpString( cnt, "<textarea name=\"desc\" wrap=\"soft\" rows=\"4\" cols=\"64\" placeholder=\"Tell us something about yourself!\">" );
 httpString( cnt, description );
 httpString( cnt, "</textarea><br>" );
 httpString( cnt, "<input type=\"submit\" value=\"Change\"></form><br>" );
+
+httpString( cnt, "<br>" );
+httpPrintf( cnt, "<form action=\"%s\" method=\"POST\"><i>Block/unblock user's messages</i><br>", URLAppend( cnt, "account" ) );
+httpPrintf( cnt, "<input type=\"number\" style = \"width: 10em; margin-bottom: 3px;\" name=\"block\" placeholder=\"Enter user's id\" min = \"0\">" );
+httpString( cnt, "<br>" );
+httpString( cnt, "<input type=\"submit\" value=\"Block/unblock\"></form><br>" );
+
+//print blocked users
+int * list = NULL;
+int size = 0;
+if ( (size = dbUserPrintBlockedList(id, &list)) > 0){
+	
+	httpString( cnt, "<br>Blocked users:<br>" );
+	for(int i = 0; i < size; i++){
+		if( dbUserMainRetrieve( list[i], &maind ) < 0 ) {
+			maind.empire = -1;
+		}
+		httpPrintf( cnt, "ID:%d Faction Name: %s<br>", list[i], maind.faction );
+	}
+}
+free(list);
+
 #if FACEBOOK_SUPPORT
 if( -timediff( *localtime( &infod.fbinfo.updated ) ) >= day ) {
 	facebook_update_user( (cnt->session)->dbuser );
@@ -187,7 +222,7 @@ void iohtmlFunc_changepass( ReplyDataPtr cnt )
     }
     if( dbUserRetrievePassword( id, oldpass ) < 0 )
       httpString( cnt, "<i>Error encountered when retrieving password.</i><br><br>" );
-    else if( ( strcmp( newpass[0], oldpass )) != 0 ) //checkencrypt
+    else if( ( checkPass( newpass[0], oldpass )) != 0 ) //checkencrypt
       httpString( cnt, "<i>Wrong old password</i><br><br>" );
     else if( !( ioCompareExact( newpass[1], newpass[2] ) ) )
       httpString( cnt, "<i>Different new passwords? Check your typing.</i><br><br>" );
@@ -307,7 +342,7 @@ if( deletestring ) {
 		iohtmlBodyEnd( cnt );
 		return;
 	}
-	else if( ( strcmp( passwordString, oldpass )) != 0 ){ //checkencrypt
+	else if( ( checkPass( passwordString, oldpass )) != 0 ){ //checkencrypt
 	  httpString( cnt, "<i>Wrong old password</i><br><br>" );
 	  iohtmlBodyEnd( cnt );
 	  return;

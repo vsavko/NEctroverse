@@ -15,7 +15,7 @@ int randnum(void){
 	else if(randnum >= 21845 && randnum < 27306)
 		return 4;
 	else
-		return 5;
+		return 5;  
 }
 
 
@@ -212,23 +212,43 @@ blame's esurge fetish - u get esurge inca and its difficulty reduced by 3!
 */
 char *artefactName[ARTEFACT_NUMUSED] =
 {
-"Rokeil's peace treaty", //ARTEFACT_1_BIT 1 //rokeil's whine manual 
-"Purification Subprocessor", //ARTEFACT_2_BIT 2
-"Wilbo's big bones", //ARTEFACT_4_BIT 4 //wilbo's big bones
-"Defenders of the faith", // ARTEFACT_8_BIT 8 
+"Rotkeil's war treaty", //ARTEFACT_1_BIT 1 //Rotkeil's war treaty - The empire has to be 60% or more in NW instead of planet count for war declaration!
+"Raider's handbook", // ARTEFACT_2_BIT 2 //every planet that you take from another emp reduces your unit upkeep by 10% for the next 10 ticks!
+"Wilbo's attacking manual", //ARTEFACT_4_BIT 4 //Wilbo's attacking manual + 25% fr max
+"Imperial Star Destroyer", // ARTEFACT_8_BIT 8 //50% chance that your cruisers' attack is 40% stronger and 50% that it is 20% weaker!
 
-"Effisiont working guide", //ARTEFACT_16_BIT 16
-"Phantom Stranger", //ARTEFACT_32_BIT 32
-"Evolution Obelisk", //ARTEFACT_64_BIT 64
-"Furtifons shield", //ARTEFACT_128_BIT 128 //furtifons shield
+"The library of Babylon", //ARTEFACT_16_BIT 16 //+50% culture
+"Cyborg technology", //ARTEFACT_32_BIT 32  // your soldiers deal 50% more damage!
+"Hidden asteroid mine", //ARTEFACT_64_BIT 64 // hidden arti, doesnt show which family has it in the ranks, increases your mineral production by 15%
+"Super stacker", //ARTEFACT_128_BIT 128 // The size of this planet is increased by 5 every tick!
 
 "Ether Gardens", //ARTEFACT_ETHER_BIT 256 
-"Blame's esurge fetish", //ARTEFACT_512_BIT 512 //blame's esurge fetish
-};
+"Blames population planning", //ARTEFACT_512_BIT 512 //  - increases the growth rate of population by 3!
+};  
 
 char *artefactDescription[ARTEFACT_NUMUSED] =
 {
-"The <b>Rokeil's peace treaty</b> You cant declare war vs this empire!", 
+"The <b>Rotkeil's war treaty</b> changes the war declaration rule from 60% in planet count to 60% in networth!", 
+"The <b>Raider's handbook</b> every planet taken from another empire decreases the fleet upkeep cost by 10% for the next 10 ticks!", 
+"The <b>Wilbo's attacking manual</b> increases every readiness maximum by 15%!",
+"The <b>Imperial Star Destroyer</b> gives you a 50% chance to have cruisers stronger by 40% and 50% to have them weaker by 20%!", 
+
+//"The <b>Universal Exchanger</b> gives you an unexplored planet, when you lose a planet in a battle!",
+"The <b>The library of Babylon</b> increases your culture by 50%!",
+"The <b>Cyborg technology</b> enables your soldiers to deal 50% more damage!",
+"The <b>Hidden asteroid mine</b> doesnt show in rankings and gives you +15% mineral production!",
+//"The <b>Ancient Research Center</b> increases the production of your research centers by 20%!",
+"The <b>Super stacker</b> makes the size of this planet increase by 7 every tick!", 
+
+"The <b>Ether Gardens</b> increase your energy production by 10%!",
+"The <b>Blame's population planning</b> increases the growth rate of population by 3!",
+};
+
+
+/* round19
+char *artefactDescription[ARTEFACT_NUMUSED] =
+{
+"The <b>Rotkeil's peace treaty</b> disables war declaration by and vs this empire!", 
 "The <b>Purification Subprocessor</b> doubles your planets bonusses!", 
 "The <b>Wilbo's big bones</b> your nw is decreased by 20%!",
 "The <b>Defenders of the faith</b> always provide you with a defensive fleet of 100k cruisers!", 
@@ -243,6 +263,7 @@ char *artefactDescription[ARTEFACT_NUMUSED] =
 "The <b>Ether Gardens</b> increase your energy production by 10%!",
 "The <b>Blame's esurge fetish</b> makes an e-surge 2 times easier and grants you the this incantation!",
 };
+*/
 
 char *artefactImage[ARTEFACT_NUMUSED] =
 {

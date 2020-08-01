@@ -1112,6 +1112,8 @@ void iohtmlFunc_administration( ReplyDataPtr cnt )
   action[35] = iohtmlVarsFind( cnt, "showbnned" );
   action[36] = iohtmlVarsFind( cnt, "banmail" );
   action[37] = iohtmlVarsFind( cnt, "banIpAndEmail" );
+  //action[38] = iohtmlVarsFind( cnt, "convertPasswords" );
+  action[39] = iohtmlVarsFind( cnt, "findaAll" );
 
 iohtmlBodyInit( cnt, "Primary re-draft of Administration panel" );
 
@@ -1272,7 +1274,18 @@ iohtmlBodyInit( cnt, "Primary re-draft of Administration panel" );
   iohtmlAdminForm( cnt, "administration" );
   httpString( cnt, "<input type=\"text\" name=\"banIpAndEmail\" value=\"user ID\">" );
   iohtmlAdminSubmit( cnt, "Ban user's ip and e-mail" );
+  
+  /*iohtmlAdminForm( cnt, "administration" );
+  httpString( cnt, "<input type=\"hidden\" name=\"convertPasswords\" value=\"1\">" );
+  iohtmlAdminSubmit( cnt, "convert passwords into hashes" ); //only use if passwords are stored as plain texts!!! 
+															 //Otherwise users wont be able to login anymore!
+															 
+															 
+ */
  
+   iohtmlAdminForm( cnt, "administration" );
+  httpString( cnt, "<input type=\"hidden\" name=\"findaAll\" value=\"1\">" );
+  iohtmlAdminSubmit( cnt, "Find all" );
 
 httpString( cnt, "</td><td width=\"60%\" align=\"left\" valign=\"top\">" );
 
@@ -1809,6 +1822,41 @@ if( action[31] ) {
 	}
 
    }
+   
+  /*if( action[38] )
+  {
+	if( sscanf( action[38], "%d", &a ) == 1 ){
+    
+		for( user = dbUserList ; user ; user = user->next )
+		{
+			if( dbUserInfoRetrieve( user->id, &infod ) < 0 ) {
+				httpString( cnt, "<i>Error getting user</i><br><br>" );
+			}
+			
+			char * tmp = generatePassHash(infod.password);
+
+			snprintf( infod.password, strlen(tmp) + 1, "%s", tmp );
+		  
+			if( dbUserInfoSet( user->id, &infod ) < 0 ) {
+				httpString( cnt, "<i>Error encountered when changing password.</i><br><br>" );
+			} 
+			else {
+				httpPrintf( cnt, "User: \'%s\' password changed to \'%s\'.<br><br>", user->name, infod.password );
+				httpPrintf( cnt, "%s\n", tmp);
+			}
+		}
+	}
+  }*/
+  
+    if( action[39] )
+  {
+    for( a =  0 ; a < dbMapBInfoStatic[MAP_PLANETS] ; a++ )
+    {
+      dbMapRetrievePlanet( a, &planetd );
+      httpPrintf( cnt, "Bonus +%d%% %s : %d,%d:%d ( %d ) size : %d <br>", planetd.special[1], cmdBonusName[ planetd.special[0] ], ( planetd.position >> 8 ) & 0xFFF, planetd.position >> 20, planetd.position & 0xFF, a, planetd.size );
+    }
+    httpPrintf( cnt, "Total : %d planets<br><br>", a );
+  }
   
   
 goto END;

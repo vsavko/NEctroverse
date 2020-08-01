@@ -441,7 +441,7 @@ for( a = 0; a < CMD_RACE_NUMUSED ; a++) {
 	if( cmdRace[a].special & CMD_RACE_SPECIAL_IDW )
 		httpString( cnt, "Imune to Dark Web Effects!<br>" );
 	if( cmdRace[a].special & CMD_RACE_SPECIAL_WOOKIEE )
-		httpString( cnt, "Soldiers cost half to upkeep!<br> Can't build droids!<br> Stockpiled resources give 0.3% interest every galactic week!" );
+		httpString( cnt, "Soldiers cost half to upkeep!<br> Can't build droids!<br> Stockpiled resources give 0.5% interest every galactic week!" );
 
 	httpString( cnt, "<table width=\"*\" border=\"0\"><tr>" );
 	httpString( cnt, "<td valign=\"top\" width=\"250\"><i><b>Main bonuses</b></i><br>" );

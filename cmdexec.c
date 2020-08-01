@@ -196,7 +196,7 @@ strncpy(newuser.name, name, USER_NAME_MAX );
 strncpy(newuser.faction, faction, USER_NAME_MAX );
 strncpy(newuser.email, email, USER_NAME_MAX );
 strncpy(newuser.ip, ip, USER_NAME_MAX );
-strncpy(newuser.password, pass, USER_PASS_MAX ); //hashencrypt
+strncpy(newuser.password, generatePassHash(pass), USER_PASS_MAX ); //hashencrypt
 strncpy(newuser.forumtag, "Player", USER_FTAG_MAX );
 b = time( 0 );
 newuser.createtime = b;
@@ -1691,22 +1691,34 @@ int cmdExecAddRelation( int fam, int type, int famtarget, int napTime, int napSt
 		
 		//60% of empire size "in planets"
 		nPct = 6;
-    		
-    if( nPct*empired.planets >= 10*empire2d.planets )
+    
+	if (empired.artefacts & ARTEFACT_1_BIT){
+		if( nPct*empired.networth > 10*empire2d.networth )
+		{
+			return -3;
+		}
+	}
+	else {
+		if( nPct*empired.planets > 10*empire2d.planets )
+		{
+		  cmdErrorString = "You can't declare war on an empire less than 60% your empire size.";
+		  return -3;
+		}
+		 if( 8*empired.planets > 10*empire2d.planets && 6*empired.networth > 10*empire2d.networth )
+		{
+		  cmdErrorString = "You can't declare on empire less than 80% of your size and 60% less than your empire networth!";
+		  return -3;
+		}
+	}
+	/*if( empired.artefacts & ARTEFACT_1_BIT || empire2d.artefacts & ARTEFACT_1_BIT)
     {
-      cmdErrorString = "You can't declare war on an empire less than 60% your empire size.";
-      return -3;
-    }
-	 if( 8*empired.planets >= 10*empire2d.planets && 6*empired.networth >= 10*empire2d.networth )
-    {
-      cmdErrorString = "You can't declare on empire less than 80% of your size and 60% less than your empire networth!";
-      return -3;
-    }
-	if( empire2d.artefacts & ARTEFACT_1_BIT)
-    {
+		if(empired.artefacts & ARTEFACT_1_BIT)
+      cmdErrorString = "An old and powerfull artefact prevents you from declaring war!";
+  		if(empire2d.artefacts & ARTEFACT_1_BIT)
       cmdErrorString = "An old and powerfull artefact prevents you from declaring war against this empire!";
+  
       return -3;
-    }
+    }*/
     rel[0] = ticks.number;
     rel[1] = type;
     rel[2] = fam;

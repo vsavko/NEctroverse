@@ -121,7 +121,15 @@ if( ( typestring ) && ( refer ) ) {
 		httpPrintf( cnt, "<mail>%d</mail>",  ( a & CMD_NEWS_FLAGS_MAIL ) ? true : false );
 		httpPrintf( cnt, "<build>%d</build>",  ( a & CMD_NEWS_FLAGS_BUILD ) ? true : false );
 		httpPrintf( cnt, "<aid>%d</aid>", ( a & CMD_NEWS_FLAGS_AID ) ? true : false );
-		httpPrintf( cnt, "<fleet>%d</fleet>", ( a & CMD_NEWS_FLAGS_ATTACK ) ? 1 : ( ( a & CMD_NEWS_FLAGS_FLEET ) ? 2 : false ) );
+
+		if( a & CMD_NEWS_FLAGS_ATTACK)
+			httpPrintf( cnt, "<fleet>%d</fleet>",1);
+		else if(a & CMD_NEWS_FLAGS_OBSERVE)
+			httpPrintf( cnt, "<fleet>%d</fleet>",3);
+		else if(a & CMD_NEWS_FLAGS_FLEET)
+			httpPrintf( cnt, "<fleet>%d</fleet>",2);
+
+			
 		httpString( cnt, "</notification>" );
 		httpString( cnt, "<ressources>" );
 		for( a = 0 ; a < CMD_RESSOURCE_NUMUSED ; a++ ) {
@@ -395,6 +403,7 @@ if( refer ) {
 	httpString( cnt, "\t\t\tif( getnodevar(xmlhttp.responseXML,\"aid\") == 1 ) { changebackground(\"headeraid\", \"files?type=image&name=i11a.jpg\"); }\n" );
 	httpString( cnt, "\t\t\tif( getnodevar(xmlhttp.responseXML,\"fleet\") == 1 ) { changebackground(\"headerfleet\", \"files?type=image&name=i12a.jpg\"); }\n" );
 	httpString( cnt, "\t\t\telse if( getnodevar(xmlhttp.responseXML,\"fleet\") == 2 ) { changebackground(\"headerfleet\", \"files?type=image&name=i12b.jpg\"); }\n" );
+	httpString( cnt, "\t\t\telse if( getnodevar(xmlhttp.responseXML,\"fleet\") == 3 ) { changebackground(\"headerfleet\", \"files?type=image&name=i12c.jpg\"); }\n" );
 	httpString( cnt, "\n" );
 	httpString( cnt, "\t\t\tvar networth = getnodevar(xmlhttp.responseXML,\"networth\");\n" );
 	httpString( cnt, "\t\t\tvar population = getnodevar(xmlhttp.responseXML,\"population\");\n" );

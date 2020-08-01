@@ -25,7 +25,7 @@ DB_FILE_USER_SPECOPS,
 DB_FILE_USER_RECORD,
 DB_FILE_USER_FLAGS,
 
-DB_FILE_USER_TOTAL,
+DB_FILE_USER_TOTAL
 };
 
 static char dbFileUserInfoName[] = "%s/user%d/info";
@@ -42,8 +42,6 @@ static char dbFileUserNewsName[] = "%s/user%d/news";
 static char dbFileUserMarketName[] = "%s/user%d/market";
 static char dbFileUserSpecOpsName[] = "%s/user%d/specops";
 static char dbFileUserGameFlags[] = "%s/user%d/flags";
-
-
 
 
 static char *dbFileUserList[DB_FILE_USER_TOTAL] = 
@@ -66,6 +64,7 @@ static int64_t dbFileUserListDat0[] = { 0, -1, -1, 0, 0 };
 static int64_t dbFileUserListDat1[] = { 0, 8 };
 
 static int dbFileUserListBase[DB_FILE_USER_TOTAL] = { 0, 0, 4, 4, 4, 40, 8, 8, 8, 4, 4, 4};
+
 static int64_t *dbFileUserListData[DB_FILE_USER_TOTAL] = 
 { 0,
 0,
@@ -103,16 +102,16 @@ static char dbFileEmpireMessageName[] = "%s/empire%d/messages";
 static char dbFileEmpireRelationsName[] = "%s/empire%d/relations";
 static char dbFileEmpireObserves[] = "%s/empire%d/observes";
 
+
 static char *dbFileEmpireList[DB_FILE_EMPIRE_TOTAL] = { 
 dbFileEmpireInfoName, 
 dbFileEmpireBuildName, 
 dbFileEmpireNewsName, 
 dbFileEmpireMessageName, 
 dbFileEmpireRelationsName,
-dbFileEmpireObserves
+dbFileEmpireObserves,
  };
-
-
+ 
 static int dbFileEmpireListBase[DB_FILE_EMPIRE_TOTAL] = { 4, 4, 40, 4, 4 };
 static int64_t *dbFileEmpireListData[DB_FILE_EMPIRE_TOTAL] = { 
 dbFileUserListDat0, 
@@ -329,7 +328,6 @@ for( a = 0 ; a < DB_FILE_BASE_TOTAL ; a++ ) {
 
 return;
 }
-
 
 FILE *dbFileUserOpen( int id, int num ) {
 	char fname[PATH_MAX];
@@ -840,6 +838,11 @@ if( !( freenum ) ) {
 if( !( user = dbUserAllocate( id ) ) ) {
 	return -3;
 }
+
+if( id < 0){
+	error("user register problem");
+	return -3;
+}
   
 //create both folder for player
 settings = GetSetting( "Directory" );
@@ -870,6 +873,7 @@ user->level = 0;
 for( a = DB_FILE_USER_TOTAL-1 ;  ; a-- ) {
 	snprintf( COREDIR, sizeof(COREDIR), "%s/data", settings->string_value );
   	snprintf( fname, sizeof(fname), dbFileUserList[a], COREDIR, id );
+
     
 	if( !( file = fopen( fname, "wb+" ) )) {
 		dbUserFree( user );
@@ -1011,7 +1015,7 @@ if( !( dbUserInfoRetrieve( id, &uinfo ) ) ) {
 	return -3;
 }
 
-strncpy( uinfo.password, pass, USER_PASS_MAX ); //hashencrypt
+strncpy( uinfo.password, generatePassHash(pass), USER_PASS_MAX ); //hashencrypt
 
 if( !( dbUserInfoSet( id, &uinfo ) ) ) {
 	error( "Error in user save, getting setting info" );
@@ -4524,8 +4528,249 @@ return num;
 }
 
 
+/*
+typedef struct {
+	bool status;
+	bool locked;
+	int number;
+	int round;
+	int speed;
+	int last;
+	int next;
+	int debug_id;
+	int debug_pass;
+	int uonline;
+	int uactive;
+	int uregist;
+} TickInfoDef, *TickInfoPtr;
 
+extern TickInfoDef ticks;*/
 
+int dbAddArtifactTimer(int empireId){
+	//add an anrtifact timer for an empire, return 1 if success, 0 if failure
+	ConfigArrayPtr setting;
+	char fname[PATH_MAX];
+	char COREDIR[PATH_MAX];
+	FILE *file;
+	
+	setting = GetSetting( "Directory" );
+	snprintf( COREDIR, sizeof(COREDIR), "%s/data", setting->string_value );  
+	snprintf( fname, sizeof(fname), "%s/empire%d/artiTimer", COREDIR, empireId );
+	
+	//append the end of a binary file (create it if it doesnt exist)
+	if( !( file = fopen( fname, "ab+" ) ) ) { 
+		return -1;
+	}
+	
+	//append tick information to the file, below is the definition of the file_w function
+	//#define file_w( data, size, count, file ) { if( fwrite( data, size, count, file ) < 1 ) 
+	//loghandle(LOG_ERR, errno, "File Write error in: %s, on line: %d", __FILE__, __LINE__ ); }
 
+	file_w( &(ticks.number), sizeof(int), 1, file );
+	fclose( file );
+	return 1;
+}
 
+int dbCheckArtifactTimer(int empireId, int numberTicksInEffect){
+	FILE *file;
+	ConfigArrayPtr setting;
+	char fname[PATH_MAX];
+	char COREDIR[PATH_MAX];
+	int size;
+	int numberOfEffects = 0;
+	struct stat st;
+	
+	setting = GetSetting( "Directory" );
+	snprintf( COREDIR, sizeof(COREDIR), "%s/data", setting->string_value );  
+	snprintf( fname, sizeof(fname), "%s/empire%d/artiTimer", COREDIR, empireId );
+	
+	//check if the timer exists, if it does give the number of effects, if not return 0
+	if( !( file = fopen( fname, "rb+" ) ) ) { 
+		return -1;
+	}
+		
+	stat(fname, &st);
+	size = st.st_size;
+	int buffer[size/sizeof(int)];
+	if (fread(&buffer, sizeof(int), size/sizeof(int), file) < 1){
+		fclose(file);
+		return -1;
+	}
+	fclose(file);
+	
+	if( !( file = fopen( fname, "wb" ) ) ) { 
+		return -1;
+	}
+	
+	//check the timer for currently effective actions and delete the expired ones
+	for(int i = 0; i < size/sizeof(int); i++) {
+		//if the effect hasn't expired wrte to new file
+		if(ticks.number - buffer[i] <= numberTicksInEffect) {
+			file_w(buffer + i, sizeof(int), 1, file );
+			++numberOfEffects;
+		}
+	}
+	fclose(file);
+	
+	if(numberOfEffects == 0){
+		if( !remove(fname))
+			return -1;
+	}
+	
+	return numberOfEffects;
+}
 
+int dbDeleteArtifactTimer(int empireId){
+	//delete the file, return 1 if success, 0 if failure
+	ConfigArrayPtr setting;
+	char fname[PATH_MAX];
+	char COREDIR[PATH_MAX];
+
+	setting = GetSetting( "Directory" );
+	snprintf( COREDIR, sizeof(COREDIR), "%s/data", setting->string_value );  
+	snprintf( fname, sizeof(fname), "%s/empire%d/artiTimer", COREDIR, empireId );
+	
+	if( !remove(fname))
+		return -1;
+	
+	return 1;
+}
+
+int dbUserAddToBlockedList( int id, int blockedID ){
+	//if the file doesnt exist - create
+	//add
+	
+	//if the file exists search if it contains blockedId and remove it
+	//else add it
+	//returns a blocked list
+	FILE *file;
+	struct stat st;
+	bool add = 1;
+	int size;
+	char fname[PATH_MAX];
+	char COREDIR[PATH_MAX];
+	ConfigArrayPtr setting;
+	
+	setting = GetSetting( "Directory" );
+	snprintf( COREDIR, sizeof(COREDIR), "%s/data", setting->string_value )  ;  
+	snprintf( fname, sizeof(fname), "%s/user%d/blocked", COREDIR, id );
+	
+	//check if the timer exists, if it does give the number of effects, if not return 0
+	if( !( file = fopen( fname, "rb+" ) ) ) { 
+		if( !( file = fopen( fname, "wb" ) ) ) { 
+			return -1;
+		}
+	}
+		
+	stat(fname, &st);
+	size = st.st_size/sizeof(int);
+	
+	if (size > 0){
+		int buffer[size];
+		
+		if (fread(&buffer, sizeof(int), size, file) < 1){
+			fclose(file);
+			return -1;
+		}
+		fclose(file);
+		
+		if( !( file = fopen( fname, "wb" ) ) ) { 
+			return -1;
+		}
+		
+		for(int i = 0; i < size; i++){
+			if (buffer[i] == blockedID){
+				add = 0;
+			}
+			else{
+				file_w( buffer+i, sizeof(int), 1, file );
+			}
+		}
+	}
+	
+	if (add == 1){
+		file_w(&blockedID,  sizeof(int), 1, file );
+	}
+
+	fclose(file);
+
+	return (add == 1) ? 1 : 0;
+
+}
+
+int dbUserCheckBlockedList( int id, int blockedID ){
+	FILE *file;
+	struct stat st;
+	char fname[PATH_MAX];
+	char COREDIR[PATH_MAX];
+	ConfigArrayPtr setting;
+	int size; 
+	
+	setting = GetSetting( "Directory" );
+	snprintf( COREDIR, sizeof(COREDIR), "%s/data", setting->string_value );  
+	snprintf( fname, sizeof(fname), "%s/user%d/blocked", COREDIR, id );
+	
+	//check if the timer exists, if it does give the number of effects, if not return 0
+	if( !( file = fopen( fname, "rb+" ) ) ) { 
+		return -1;
+	}
+	stat(fname, &st);
+	size = st.st_size/sizeof(int);
+	
+	if (size > 0){
+		int buffer[size];
+		
+		if (fread(&buffer, sizeof(int), size, file) < 1){
+			fclose(file);
+			return -1;
+		}
+		fclose(file);
+		
+		for(int i = 0; i < size; i++){
+			if (buffer[i] == blockedID){
+				return 1;
+			}
+		}
+	}
+
+	return -1;	
+}
+
+int dbUserPrintBlockedList( int id, int **list ){
+	FILE *file;
+	struct stat st;
+	char fname[PATH_MAX];
+	char COREDIR[PATH_MAX];
+	ConfigArrayPtr setting;
+	int size; 
+	
+	setting = GetSetting( "Directory" );
+	snprintf( COREDIR, sizeof(COREDIR), "%s/data", setting->string_value );  
+	snprintf( fname, sizeof(fname), "%s/user%d/blocked", COREDIR, id );
+	
+	//check if the timer exists, if it does give the number of effects, if not return 0
+	if( !( file = fopen( fname, "rb+" ) ) ) { 
+		return -1;
+	}
+	stat(fname, &st);
+	size = st.st_size/sizeof(int);
+	*list = malloc(st.st_size);
+	
+	if (size > 0){
+		int buffer[size];
+		
+		if (fread(&buffer, sizeof(int), size, file) < 1){
+			fclose(file);
+			return -1;
+		}
+		fclose(file);
+		
+		for(int i = 0; i < size; i++){
+			(*list)[i] = buffer[i];
+		}
+	}
+
+	return size;	
+	
+}
+	

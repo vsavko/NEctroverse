@@ -200,8 +200,8 @@ int64_t cmdUnitCost[CMD_UNIT_NUMUSED][CMD_RESSOURCE_NUMUSED+1] =
 { 100,  0,  0,  1,  3 },
 {  50,  5,  0,  1,  2 },
 { 350, 20,  8, 10,  4 },
-//{  -1, -1, -1, -1, -1 },
-{  300, 0, 10, 0, 1 },
+{  -1, -1, -1, -1, -1 },
+//{  300, 0, 10, 0, 1 },
 
 { 150,  0, 10,  0,  5 },
 { 150,  0,  0, 10,  5 },
@@ -1049,11 +1049,11 @@ int cmdFleetAction( dbUserFleetPtr fleetd, int id, int fltid, int postnews )
 					
 		
 		
-		if ( maind.artefacts & ARTEFACT_128_BIT && planetd.special[1]  >= 30.0 ){
+		/*if ( maind.artefacts & ARTEFACT_128_BIT && planetd.special[1]  >= 30.0 ){
 			for (i = 0; i < CMD_RESEARCH_NUMUSED; i++)
 				maind.research[i] = (int64_t) ( (double)maind.research[i] * 1.01) ;
 			dbUserMainSet( id, &maind );
-		}
+		}*/
 			
 		
 		if (planetd.special[1] < 30.0 ){
@@ -1242,7 +1242,7 @@ int cmdFleetAction( dbUserFleetPtr fleetd, int id, int fltid, int postnews )
 			int arte_pick;
 			dbMainPlanetDef planetd2;
 			
-			if (maind.benefactor[2] < 4){
+			if (maind.benefactor[2] < 1){
 				for( a = 0 ; a < dbMapBInfoStatic[MAP_PLANETS] ; a++ )
 				{
 				  dbMapRetrievePlanet( a, &planetd2 );

@@ -1,6 +1,9 @@
 #include "md5.c"
 #include "base64.c"
 
+/*#include "md5.c"
+#include "base64.c"
+
 void saltgen( char salt[SALT_SIZE] ) {
 	int i;
 	const char *const seedchars = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -72,6 +75,41 @@ enc = crypt_r(md5sum, passcheck, &data);
 
 return ( ( strcmp( enc, passcheck) == 0 ) ? 1 : 0 );
 }
+*/
+
+
+char* generatePassHash(char *str) {
+    char salt[] = "$6$................";
+    const char *const seedchars =
+    "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+	unsigned char random[16];
+	FILE * fp;
+	
+	//get random 16-bytes
+	if( (fp = fopen("/dev/urandom", "rb")) ) {
+		if( fread( &random, 1, 16, fp ) < 1 ) {
+			fclose(fp);
+			return null;
+		}
+		fclose(fp);
+	}
+	
+	//tranform them into characters
+    for (int i = 0; i < 16; i++) {
+        salt[3+i] = seedchars[ random[i] % strlen(seedchars) ];
+    }
+
+	char * pass = crypt(str, salt);
+    return pass;	
+}
+
+int checkPass(char * eneteredPass, char * storedPass){
+	//stored pass allready contains the salt, which will be used to justify the entered pass
+	//if the entered pass is the same as the stored pass the hash generated will be the same
+	char * check = strdup(crypt(eneteredPass, storedPass));
+	return (strcmp(check,storedPass) == 0) ? 0 : 1;
+}
+
 
 
 

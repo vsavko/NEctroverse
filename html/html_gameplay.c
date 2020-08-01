@@ -202,8 +202,11 @@ if( ticks.status ) {
  httpPrintf( cnt, "<td onclick=\"document.location='%s'\" id=\"headerfleet\" height=\"42\" style=\"background-image:url(files?type=image&amp;name=i12", URLAppend( cnt, "hq" ) );
  if( a & CMD_NEWS_FLAGS_ATTACK )
   httpString( cnt, "a" );
+ else if( a & CMD_NEWS_FLAGS_OBSERVE )
+  httpString( cnt, "c" );
  else if( a & CMD_NEWS_FLAGS_FLEET )
   httpString( cnt, "b" );
+
  httpString( cnt, ".jpg);\" width=\"39\" border=\"0\" class=\"href\"></a></td>" );
 
  httpString( cnt, "<td width=\"18\" height=\"42\" background=\"files?type=image&amp;name=i13.jpg\"></td>" );
@@ -2000,12 +2003,12 @@ for( a = 0 ; a < CMD_UNIT_NUMUSED ; a++ ) {
  for( a = 0 ; a < CMD_UNIT_NUMUSED ; a++ )
  {
   buildstring[a][0] = 0;
-    if(!((maind.artefacts & ARTEFACT_32_BIT) && a == CMD_UNIT_PHANTOM)) 
-	{
+    //if(!((maind.artefacts & ARTEFACT_32_BIT) && a == CMD_UNIT_PHANTOM)) 
+	//{
 	
 	if( !( buildunit[a] ) ) 
 		continue;
-	}
+	//}
 
   if( sscanf( buildunit[a], "%d", &b ) <= 0 )
    continue;
@@ -2027,10 +2030,10 @@ for( a = 0 ; a < CMD_UNIT_NUMUSED ; a++ ) {
  httpPrintf( cnt, "<a href=\"%s&amp;type=units&amp;request=ajax\" rel=\"ajaxpanel\" data-loadtype=\"ajax\">Unit Information</a><br><br>", URLAppend( cnt, "info" ) );
  for( a = 0 ; a < CMD_UNIT_NUMUSED ; a++ )
  {
-  if(!(maind.artefacts & ARTEFACT_32_BIT) && a == CMD_UNIT_PHANTOM) 
-		continue;
+  //if(!(maind.artefacts & ARTEFACT_32_BIT) && a == CMD_UNIT_PHANTOM) 
+	//	continue;
 
-  if (a == CMD_UNIT_SOLDIER && (cmdRace[maind.raceid].special & CMD_RACE_SPECIAL_WOOKIEE)){ 
+  if (a == CMD_UNIT_DROID && (cmdRace[maind.raceid].special & CMD_RACE_SPECIAL_WOOKIEE)){ 
 	continue;
   }
 	
@@ -2042,10 +2045,10 @@ for( a = 0 ; a < CMD_UNIT_NUMUSED ; a++ ) {
  httpString( cnt, "<table cellspacing=\"6\" border=\"0\"><tr><td><b>Unit</b></td><td><b>Cost</b></td><td><b>Owned</b></td><td><b>Build</b></td></tr>" );
  for( a = 0 ; a < CMD_UNIT_NUMUSED ; a++ )
  {
-	   if(!(maind.artefacts & ARTEFACT_32_BIT) && a == CMD_UNIT_PHANTOM) 
-		continue;
+	   //if(!(maind.artefacts & ARTEFACT_32_BIT) && a == CMD_UNIT_PHANTOM) 
+		//continue;
 
-	if (a == CMD_UNIT_SOLDIER  && (cmdRace[maind.raceid].special & CMD_RACE_SPECIAL_WOOKIEE)){
+	if (a == CMD_UNIT_DROID  && (cmdRace[maind.raceid].special & CMD_RACE_SPECIAL_WOOKIEE)){
 	continue;
 	}
 	 
@@ -2416,7 +2419,8 @@ else
 
 if( planetd.surrender != -1 ) {
     if( dbUserMainRetrieve( planetd.surrender, &main2d ) < 0 )
-	return;
+		httpPrintf( cnt, "offer bug!" );
+	//return;
 	httpPrintf( cnt, "&nbsp;offered to <a href=\"%s&amp;id=%d\">%s</a>", URLAppend( cnt, "player" ) , planetd.surrender, main2d.faction );
 }
 
@@ -2854,18 +2858,27 @@ if( ( id >= 0 ) && ( user ) && ( ( curfam == maind.empire ) || ( ( (cnt->session
      c++;
    }
   }
-  if( ( 3*c >= ARTEFACT_NUMUSED ) || ( (3*dbArtefactMax)/2 >= ARTEFACT_NUMUSED ) )
-  {
-   httpString( cnt, "<table border=\"0\"><tr><td>" );
-   for( a = 0, b = 1 ; a < ARTEFACT_NUMUSED ; a++, b <<= 1 )
-   {
-   	if( empired.artefacts & b )
-   	{
-   		httpPrintf( cnt, " <img src=\"files?type=image&amp;name=artefact/%s\" alt=\"%s\" title=\"%s\"> %s<br>", artefactImage[a], artefactName[a], artefactName[a], artefactDescription[a] );//ArtefactTable[a]->name, ArtefactTable[a]->name, ArtefactTable[a]->name, ArtefactTable[a]->description );
-   	}
-   }
-   httpString( cnt, "</td></tr></table>" );
-  }
+  
+  
+
+	  if( ( 3*c >= ARTEFACT_NUMUSED ) || ( (3*dbArtefactMax)/2 >= ARTEFACT_NUMUSED ) )
+	  {
+	   if (! (c == 4 && empired.artefacts & ARTEFACT_64_BIT)){  
+		   httpString( cnt, "<table border=\"0\"><tr><td>" );
+		   for( a = 0, b = 1 ; a < ARTEFACT_NUMUSED ; a++, b <<= 1 )
+		   {
+			if( empired.artefacts & b )
+			{	
+				if (b == ARTEFACT_64_BIT) continue;
+				httpPrintf( cnt, " <img src=\"files?type=image&amp;name=artefact/%s\" alt=\"%s\" title=\"%s\"> %s<br>", artefactImage[a], artefactName[a], artefactName[a], artefactDescription[a] );//ArtefactTable[a]->name, ArtefactTable[a]->name, ArtefactTable[a]->name, ArtefactTable[a]->description );
+			}
+		   }
+		   httpString( cnt, "</td></tr></table>" );
+		}
+	  }
+  
+  
+  
  }
  if( curfam == maind.empire )
   httpString( cnt, "<br>Empire members are marked online if a page was requested in the last 5 minutes." );
@@ -7339,6 +7352,7 @@ if( ( id = iohtmlIdentify( cnt, 1|2 ) ) < 0 )
   	fa = 1;
 
   fa *= (float)specopEnlightemntCalc(planetd.owner,CMD_ENLIGHT_BADFR);
+  
 
   httpPrintf( cnt, " The loss of fleet readiness for an attack is estimated to %d%%.<br>", ( (int)( fa * (float)fr ) ) >> 16 );
   if( fa > 1.05 )
@@ -7684,11 +7698,11 @@ if ( ( planetstring ) && ( sscanf( planetstring, "%d", &plnid ) == 1 ) ) {
  httpPrintf( cnt, "<a href=\"%s&amp;type=Incantations&amp;request=ajax\" rel=\"ajaxpanel\" data-loadtype=\"ajax\">Incantations</a><br>", URLAppend( cnt, "info" ) );
  for( a = 0 ; a < CMD_GHOSTOP_NUMUSED ; a++ )
  {
-	 if(!((maind.artefacts & ARTEFACT_512_BIT)&&(a == CMD_INCANT_ENERGYSURGE ))){
+	// if(!((maind.artefacts & ARTEFACT_512_BIT)&&(a == CMD_INCANT_ENERGYSURGE ))){
 		if( specopGhostsAllowed( a, maind.raceid ) == NO ) {
 			continue;
 		}
-	 }
+	 //}
   b = cmdGetOpPenalty( maind.totalresearch[CMD_RESEARCH_CULTURE], cmdGhostopTech[a] );
   if( b == -1 )
    httpPrintf( cnt, "<input type=\"radio\" name=\"op\" value=\"%d\" disabled> %s<br>&nbsp;&nbsp;&nbsp;<font color=\"#FF0000\">Unavailable</font><br>", a, cmdGhostopName[a] );
@@ -8823,7 +8837,11 @@ if( ( tostring ) && ( mailstring ) ) {
 		}
 		if( a < 0 ) {
 			httpPrintf( cnt, "<i>The faction %s does not seem to exist, the syntax must be exact or use the user ID.</i><br><br>", tostring );
-		} else {
+		} 
+		else if( !(((cnt->session)->dbuser)->level >= LEVEL_MODERATOR) && dbUserCheckBlockedList(a , id) == 1){
+			httpString( cnt, "<i>This player has blocked you!</i><br><br>" );
+		}
+		else {
 			if( dbUserMainRetrieve( a, &main2d ) < 0 ) {
 				httpString( cnt, "<i>Are you sure this user exist?</i><br><br>" );
 			} else {

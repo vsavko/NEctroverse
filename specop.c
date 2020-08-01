@@ -301,8 +301,9 @@ void specopAgentsPerformOp( int id, int fltid, dbUserFleetPtr fleetd, int64_t *n
 	    refatt = 1.0 - refdef;
 		
 		  if (fleetd->order == CMD_FLEET_ORDER_SPYTARGET || fleetd->order == CMD_FLEET_ORDER_OBSERVEPLANET || fleetd->order == CMD_FLEET_ORDER_INFILTRATION || 
-		fleetd->order == CMD_FLEET_ORDER_PLANETBEACON || fleetd->order == CMD_FLEET_ORDER_ESPIONAGE)
+		fleetd->order == CMD_FLEET_ORDER_PLANETBEACON || fleetd->order == CMD_FLEET_ORDER_ESPIONAGE){
 			tlosses = 1.0 - pow( ( 0.5 * success ), 0.05 );
+		}
 		else
 			tlosses = 1.0 - pow( ( 0.5 * success ), 0.2 );
 		
@@ -367,6 +368,7 @@ void specopAgentsPerformOp( int id, int fltid, dbUserFleetPtr fleetd, int64_t *n
 	    }
 	    if( planetd.owner == -1 )
 	    {
+		  postnew = CMD_NEWS_FLAGS_OBSERVE;
 	      memset( &planetd, 0, sizeof(dbMainPlanetDef) );
 	      planetd.owner = -1;
 	    }
@@ -1476,13 +1478,13 @@ void specopGhostsPerformOp( int id, int fltid, dbUserFleetPtr fleetd, int64_t *n
     return;
   }
   
-   if(!((maind.artefacts & ARTEFACT_512_BIT)&&(specop == CMD_INCANT_ENERGYSURGE ))){
+  // if(!((maind.artefacts & ARTEFACT_512_BIT)&&(specop == CMD_INCANT_ENERGYSURGE ))){
 	  if( !( specopGhostsAllowed( specop, maind.raceid ) ) )
 	  {
 		cmdUserNewsAdd( id, newd, postnew );
 		return;
 	  }
-   }
+  // }
 
   penalty = cmdGetOpPenalty( maind.totalresearch[CMD_RESEARCH_CULTURE], cmdGhostopTech[specop] );
   if( penalty == -1 )
@@ -1573,7 +1575,7 @@ else //code arti*/
   if( fleetd->order == CMD_FLEET_ORDER_SENSE )
   {
     newd[2] = CMD_NEWS_INSENSE;
-
+	postnew = CMD_NEWS_FLAGS_OBSERVE;
     // fa = maximum search distance for artefact
     fa = 2.0 * (double)log10( 10.0 * (double)attack );
     fa *= ( (double)( rand() & 0xFF ) ) / 256.0;
@@ -1607,6 +1609,7 @@ else //code arti*/
   {
    specopd.vars[0] = 0;
     newd[2] = CMD_NEWS_INSURVEY;
+	postnew = CMD_NEWS_FLAGS_OBSERVE;
     if( ( ( b = dbMapFindSystem( ( fleetd->destination >> 8 ) & 0xFFF, fleetd->destination >> 20 ) ) < 0 ) || ( dbMapRetrieveSystem( b, &systemd ) < 0 ) )
       c = d = 0;
     else
@@ -1653,6 +1656,7 @@ else //code arti*/
   else if( fleetd->order == CMD_FLEET_ORDER_SHIELDING )
   {
     newd[2] = CMD_NEWS_INSHIELDING;
+	postnew = CMD_NEWS_FLAGS_OBSERVE;
     fa = 500.0 * (double)attack * ( ( (double)( 128 + ( rand() & 0x7F ) ) ) / 256.0 );
     a = (int)fa;
     if( a > 0 )
@@ -1697,6 +1701,7 @@ else //code arti*/
   else if( fleetd->order == CMD_FLEET_ORDER_VORTEX )
   {
     newd[2] = CMD_NEWS_INVORTEX;
+	postnew = CMD_NEWS_FLAGS_OBSERVE;
     fa = 7.0 * (double)attack / (double)maind.networth;
     a = (int)( 120.0 * fa );
     if( a > 2 )
@@ -1713,9 +1718,6 @@ else //code arti*/
     else if( fleetd->order == CMD_FLEET_ORDER_ARMS )
   {
     newd[2] = CMD_NEWS_INARMS;
-
-	
-	
       if ( (success >= 0.5 && id != planetd.owner) || id == planetd.owner ){
 		  fc = ((double)attack / ((double)(planetd.population) / 80));
 		  fa = (int64_t)((double)planetd.population *0.95 * fmin(1,success) * fmin(1, fc) );
@@ -1777,8 +1779,8 @@ else //code arti*/
   {
     newd[2] = CMD_NEWS_INENERGYSURGE;
 	
-	if( maind.artefacts & ARTEFACT_512_BIT)
-			success *= 2;
+	//if( maind.artefacts & ARTEFACT_512_BIT)
+	//		success *= 2;
 
     if( success >= 1.0 )
     {
@@ -2130,13 +2132,5 @@ int specopVortexListCalc( int id, int num, int **buffer )
     free( specopd );
   return totalnum;
 }
-
-
-
-
-
-
-
-
 
 

@@ -117,17 +117,16 @@ int battleReadinessLoss( dbUserMainPtr maind, dbUserMainPtr main2d )
   }
   cmdErrorString = err;
 
-	
 	if((cmdRace[main2d->raceid].special & CMD_RACE_SPECIAL_CULPROTECT)&&(maind->empire != main2d->empire))
 	{
     	fa *= log10(main2d->totalresearch[CMD_RESEARCH_CULTURE]+10);
 	}
 	
 	//furti arti
-	if(( main2d->artefacts & ARTEFACT_128_BIT)&&(maind->empire != main2d->empire))
+	/*if(( main2d->artefacts & ARTEFACT_128_BIT)&&(maind->empire != main2d->empire))
 	{
     	fa *= log10(main2d->totalresearch[CMD_RESEARCH_CULTURE]+10);
-	}
+	}*/
 
 	if( fa >= max )
     return (int)( max * 65536.0 );
@@ -305,8 +304,14 @@ int battle( int id, int fltid, int64_t *results )
 
   // fleets
   attunit = fleetd.unit;
-  for( a = 0 ; a < CMD_UNIT_FLEET ; a++ )
+  for( a = 0 ; a < CMD_UNIT_FLEET ; a++ ){
+	  
     defunit[a] = planetd.unit[a] + (int64_t)( cover * (float)fleet2d.unit[a] );
+  }
+  
+
+
+	 
   memcpy( attunitbase, attunit, CMD_UNIT_FLEET*sizeof(int64_t) );
   memcpy( defunitbase, defunit, CMD_UNIT_FLEET*sizeof(int64_t) );
   defsatsbase = defsats = planetd.building[CMD_BUILDING_SATS];
@@ -317,19 +322,53 @@ int battle( int id, int fltid, int64_t *results )
   results[0] = defid;
   results[1] = main2d.empire;
   results[2] = (int)( 100.0 * cover );
+  
+  	/*if (main2d.artefacts & ARTEFACT_8_BIT){
+	defunit[CMD_UNIT_CRUISER] +=(int64_t)(100000.0 * cover);
+	}*/
 
 
   for( a = 0 ; a < CMD_UNIT_FLEET ; a++ )
   {
     for( b = 0 ; b < CMD_UNIT_STATS_BATTLE ; b++ )
     {
-      attstats[a][b] = (cmdUnitStats[a][b]) * cmdRace[maind.raceid].unit[a];
+	  attstats[a][b] = (cmdUnitStats[a][b]) * cmdRace[maind.raceid].unit[a];
       defstats[a][b] = (cmdUnitStats[a][b]) * cmdRace[main2d.raceid].unit[a];
     }
   }
-
-	if (main2d.artefacts & ARTEFACT_8_BIT)
-		 defunit[CMD_UNIT_CRUISER] += 100000;
+  
+  	
+	if (maind.artefacts & ARTEFACT_8_BIT ){
+		double factor;
+		if ((rand() & 0xFF) > 0x7F) factor = 1.4;
+		else factor = 0.8;
+		
+		for( b = 0 ; b < CMD_UNIT_STATS_BATTLE ; b++ )
+		{
+		  attstats[CMD_UNIT_CRUISER][b] *= factor;
+		}
+	}
+	
+	if (main2d.artefacts & ARTEFACT_8_BIT ){
+		double factor;
+		if ((rand() & 0xFF) > 0x7F) factor = 1.4;
+		else factor = 0.8;
+		
+		for( b = 0 ; b < CMD_UNIT_STATS_BATTLE ; b++ )
+		{
+		  defstats[CMD_UNIT_CRUISER][b] *= factor;
+		}		  
+	}
+	
+	if (maind.artefacts & ARTEFACT_32_BIT ){
+		attstats[CMD_UNIT_SOLDIER][2] *= 1.5;
+	}
+	
+	if (main2d.artefacts & ARTEFACT_32_BIT ){
+		defstats[CMD_UNIT_SOLDIER][2] *= 1.5;	
+	}
+	
+  
 /*** PHASE 1 ***/
 
   flee = 0;
@@ -922,6 +961,13 @@ int battle( int id, int fltid, int64_t *results )
 
 
   battleAttFlee:
+  
+  /*if (main2d.artefacts & ARTEFACT_8_BIT ) {
+	  defunit[CMD_UNIT_CRUISER] = fmax(0,fmin(defunitbase[CMD_UNIT_CRUISER],defunit[CMD_UNIT_CRUISER]));
+  }*/
+  
+	//main2d.totalunit[CMD_UNIT_CRUISER] = fmax(0,fmin(defunitbase[CMD_UNIT_CRUISER],defunit[a]));
+  
   if( flee )
     results[3] |= flee << 4;
 
@@ -929,7 +975,9 @@ int battle( int id, int fltid, int64_t *results )
   {
     fleetd.unit[a] = attunit[a];
     b |= fleetd.unit[a];
+	
     planetd.unit[a] -= defunitbase[a] - defunit[a];
+
     if( planetd.unit[a] < 0 )
     {
       fleet2d.unit[a] += planetd.unit[a];
@@ -971,15 +1019,8 @@ int battle( int id, int fltid, int64_t *results )
 
   for( a = 0 ; a < CMD_UNIT_FLEET ; a++ )
   {
-    
-	if (main2d.artefacts & ARTEFACT_8_BIT && a == CMD_UNIT_CRUISER) { 
-	main2d.totalunit[a] = fmin(defunitbase[a], 100000 + defunit[a]);
-	newd[8+a] = defunitbase[a] - fmin(defunitbase[a], defunit[a]);
-	}
-	else{
     main2d.totalunit[a] -= defunitbase[a] - defunit[a];
 	newd[8+a] = defunitbase[a] - defunit[a];
-	}
   }
   for( a = 0 ; a < CMD_UNIT_FLEET ; a++ )
   {
@@ -1093,6 +1134,9 @@ int battle( int id, int fltid, int64_t *results )
 	
 	//if (artefactPrecense(&planetd) == ARTEFACT_METAMORPH && maind.empire != main2d.empire) 
 	//	metamorphosis_effect(&maind, id);
+
+  if ( maind.artefacts & ARTEFACT_2_BIT )
+	  dbAddArtifactTimer(maind.empire);
   
   dbUserPlanetAdd( id, fleetd.destid, fleetd.sysid, fleetd.destination, 0 );
 
