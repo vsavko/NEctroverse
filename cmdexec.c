@@ -161,10 +161,10 @@ int cmdEmailCheckNewUser( char *name, char *pass, char *faction, char *email, ch
 	strcpy(name_with_extension, body);
 	strcat(name_with_extension, randomCode);*/
 	char *emailName = "Your login: ";
-	char *emailPass = "Your password: ";
+	//char *emailPass = "Your password: ";
 	
 	char * emailString = NULL;
-	if (asprintf(&emailString, "%s %s\\n\\n%s %s\\n%s %s", body, randomCode, emailName, name, emailPass, pass) < 0){
+	if (asprintf(&emailString, "%s %s\\n\\n%s %s", body, randomCode, emailName, name) < 0){
 		free(randomCode);
 		return -2;
 	}
