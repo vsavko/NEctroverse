@@ -529,7 +529,7 @@ for( a = 0 ; a < num ; a++ ) {
 	if( ( planetd.flags & CMD_PLANET_FLAGS_PORTAL ) ) {
 		planetd.protection = 100;
 	} else {
-      		planetd.protection = (int)( 100.0 * battlePortalCalc( ( planetd.position >> 8 ) & 0xFFF, planetd.position >> 20, portals, nump, mainp->totalresearch[CMD_RESEARCH_CULTURE] ) );
+      		planetd.protection = (int)( 100.0 * battlePortalCalc( ( planetd.position >> 8 ) & 0xFFF, planetd.position >> 20, portals, nump, mainp->totalresearch[CMD_RESEARCH_PORTALS] ) );
 	}
 
 	if( planetd.construction < 0 ) {
@@ -819,7 +819,7 @@ for( user = dbUserList ; user ; user = user->next ) {
 		//if(maind.artefacts & ARTEFACT_64_BIT) 
 		//	fa = ( (maind.allocresearch[a]) * ( 100 * cmdTickProduction[CMD_BUILDING_RESEARCH] * 1.20 + maind.fundresearch + artiBonus) ) / 10000.0;
 		//else	
-			fa = ( (maind.allocresearch[a]) * ( 100*cmdTickProduction[CMD_BUILDING_RESEARCH] + maind.fundresearch + artiBonus) ) / 10000.0;
+			fa = ( (maind.allocresearch[a]) * ( 100*cmdTickProduction[CMD_BUILDING_RESEARCH] + 1.2*maind.fundresearch + artiBonus) ) / 10000.0;
 		
 	
 		
@@ -830,7 +830,7 @@ for( user = dbUserList ; user ; user = user->next ) {
 		maind.research[a] += cmdRace[maind.raceid].researchpoints[a] * fa * specopEnlightemntCalc(user->id,CMD_ENLIGHT_RESEARCH);
 		
 		if( cmdRace[maind.raceid].special & CMD_RACE_SPECIAL_POPRESEARCH )
-			maind.research[a] += ( (maind.allocresearch[a]) * maind.ressource[CMD_RESSOURCE_POPULATION] ) / ( 600.0 * 100.0 );
+			maind.research[a] += 1.2*( (maind.allocresearch[a]) * maind.ressource[CMD_RESSOURCE_POPULATION] ) / ( 600.0 * 100.0 );
 			
 		maind.research[a] = fmax( 0.0, maind.research[a]);
 		total_rc += maind.research[a];
@@ -900,6 +900,7 @@ for( user = dbUserList ; user ; user = user->next ) {
 	        }*/
 
 		b = fa * ( 1.0 - exp( maind.research[a] / ( -10.0 * maind.networth ) ) );
+
 		if( b > maind.totalresearch[a] ) {
 			maind.totalresearch[a]++;
 		} else if( b < maind.totalresearch[a] ) {
@@ -1022,9 +1023,8 @@ for( user = dbUserList ; user ; user = user->next ) {
 	
 	
 	maind.infos[INFOS_POPULATION_REDUCTION] = (1.0/35.0) * maind.ressource[CMD_RESSOURCE_POPULATION];
-
 	//Population Reduction changed to include portals + units
-	maind.infos[INFOS_PORTALS_UPKEEP] = fmax( 0.0, ( pow( (maind.totalbuilding[CMD_BLDG_NUMUSED]-1), 1.2736 ) * 10000.0) );
+	maind.infos[INFOS_PORTALS_UPKEEP] = fmax( 0.0, ( pow( (maind.totalbuilding[CMD_BLDG_NUMUSED]-1), 1.2736 ) * 10000.0)/ (1.0 + (double)maind.totalresearch[CMD_RESEARCH_PORTALS]/100.0));
 	maind.infos[INFOS_POPULATION_REDUCTION] = fmin( maind.infos[INFOS_POPULATION_REDUCTION], ( maind.infos[INFOS_BUILDING_UPKEEP] + maind.infos[INFOS_UNITS_UPKEEP] + maind.infos[INFOS_PORTALS_UPKEEP] ) );
 
 	/*

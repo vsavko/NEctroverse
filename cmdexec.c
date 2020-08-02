@@ -1616,9 +1616,10 @@ int cmdExecAddRelation( int fam, int type, int famtarget, int napTime, int napSt
   if( cmdExecFindRelation( fam, famtarget, &a, 1 ) >= 0 )
 	return -6;
 	
-    if( a >= 0 )
+    if( a >= 1 )
     {
-      cmdErrorString = "No alliances allowed for this round!";
+		
+      cmdErrorString = "Only one alliance allowed!";
 
       return -7;
     }

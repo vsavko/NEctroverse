@@ -136,7 +136,8 @@ char *cmdResearchName[CMD_RESEARCH_NUMUSED] =
 "Energy",
 "Population",
 "Culture",
-"Operations"
+"Operations",
+"Portals"
 };
 
 char *cmdResearchDesc[CMD_RESEARCH_NUMUSED] =
@@ -146,8 +147,9 @@ char *cmdResearchDesc[CMD_RESEARCH_NUMUSED] =
 "Allow construction of advanced units and buildings",
 "Increases your energy production efficency",
 "Increases population capacity and rate of growth",
-"Increases psychics capabilities and portal coverage",
-"Increases the effectiveness of your agents"
+"Increases psychics capabilities",
+"Increases the effectiveness of your agents",
+"Increases portal coverage and reduces their upkeep cost"
 };
 
 
@@ -185,7 +187,7 @@ int cmdBuildingNetworth[CMD_BLDG_NUMUSED+1] =
 
 float cmdBuildingProduction[CMD_BLDG_NUMUSED] = 
 {
-12, 40, 1, 1, 1, 1000, 5, 0, 0
+12, 40, 1, 1, 1, 1000, 6, 0, 0
 };
 
 
@@ -399,7 +401,7 @@ int cmdPsychicopFlags[CMD_PSYCHICOP_NUMUSED] =
 // 1:stealth  2:can be self-spell  4:target system  8:not offensive
 int cmdGhostopFlags[CMD_GHOSTOP_NUMUSED] =
 {
-4, 1|4, 1|2|8, 0, 4, 1, 2, 1|2
+4, 1|4, 1|2|8, 0, 4, 1, 0, 1|2
 };
 
 
@@ -408,8 +410,8 @@ cmdRaceDef cmdRace[CMD_RACE_NUMUSED] =
 {
  {//Hark
   (0.8*0.02), 1.4, 0.9, 1.4*2.0,
-  {   1.2,   1.2,   1.2,   1.2,   1.2,   0.6,   1.2 },
-  { 250.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0 },
+  {   1.2,   1.2,   1.2,   1.2,   1.2,   0.6,   1.2, 1.2 },
+  { 250.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0 },
   { 1.0, 1.2, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 },
   { 0.90, 1.00, 1.25, 1.00 },
   0,
@@ -419,8 +421,8 @@ cmdRaceDef cmdRace[CMD_RACE_NUMUSED] =
  },
  {//manti
   (0.9*0.02), 0.7, 1.1, 1.0*2.0,
-  {   0.9,   0.9,   0.9,   0.9,   0.9,   1.8,   0.9 },
-  { 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0 },
+  {   0.9,   0.9,   0.9,   0.9,   0.9,   1.8,   0.9,  0.9 },
+  { 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0 },
   { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,   1.4, 1.0, 1.2, 1.0 },
   { 1.40, 1.00, 1.00, 1.00 },
   CMD_RACE_SPECIAL_SOLARP15,
@@ -430,8 +432,8 @@ cmdRaceDef cmdRace[CMD_RACE_NUMUSED] =
  },
  {//foohon
   (0.8*0.02), 1.2, 1.1, 1.0*2.0,
-  {   1.5,   1.5,   1.5,   1.5,   1.5,   1.5,   1.5 },
-  { 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0 },
+  {   1.5,   1.5,   1.5,   1.5,   1.5,   1.5,   1.5,   1.5 },
+  { 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0 },
   { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,   1.0, 1.0, 1.1, 1.0 },
   { 0.80, 1.00, 1.00, 1.20 },
   CMD_RACE_SPECIAL_POPRESEARCH,
@@ -441,8 +443,8 @@ cmdRaceDef cmdRace[CMD_RACE_NUMUSED] =
  },
  {//spaceborne
   (1.2*0.02), 1.0, 1.2, 1.8*2.0,
-  {   1.1,   1.1,   0.6,   1.1,   1.1,   1.1,   1.1 },
-  { 200.0, 200.0, 200.0, 250.0, 200.0, 200.0, 200.0 },
+  {   1.1,   1.1,   0.6,   1.1,   1.1,   1.1,   1.1,  1.1 },
+  { 200.0, 200.0, 200.0, 250.0, 200.0, 200.0, 200.0, 200.0 },
   { 1.0, 1.0, 1.0, 1.0, 1.0, 1.1, 1.1, 1.0, 1.0,   0.7, 1.3, 1.0, 1.0 },
   { 1.30, 1.00, 1.00, 1.00 },
   0,
@@ -452,8 +454,8 @@ cmdRaceDef cmdRace[CMD_RACE_NUMUSED] =
  },
  {//dreamweaver
   (1.1*0.02), 1.0, 0.7, 1.0*2.0,
-  {   1.4,   1.4,   2.8,   1.4,   1.4,   1.4,   1.4 },
-  { 100.0, 250.0, 200.0, 200.0, 200.0, 200.0, 200.0 },
+  {   1.4,   1.4,   2.8,   1.4,   1.4,   1.4,   1.4,  1.4 },
+  { 100.0, 250.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0 },
   { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,   1.5, 1.0, 1.3, 1.0 },
   { 0.80, 1.00, 1.00, 1.00 },
   0,
@@ -463,13 +465,13 @@ cmdRaceDef cmdRace[CMD_RACE_NUMUSED] =
  },
   {//Wookiee
   (1.2*0.02), 0.9, 1.3, 1.6*2.0,
-  {   1.1,   1.1,   1.1,   1.1,   2.0,   1.1,   1.1 },
-  { 200.0, 200.0, 200.0, 200.0, 250.0, 200.0, 200.0 },
+  {   1.0,   2.0,   1.0,   1.0,   2.0,   1.0,   1.0,  2.0},
+  { 200.0, 200.0, 200.0, 200.0, 250.0, 200.0, 200.0, 200.0 },
   { 1.0, 1.0, 1.0, 1.15, 1.0, 1.0, 1.0, 1.0, 1.0,   1.0, 1.0, 1.15, 1.0 },
-  { 0.70, 1.3, 0.90, 1.00 },
+  { 0.70, 1.25, 1.25, 1.00 },
   CMD_RACE_SPECIAL_WOOKIEE,
   0 | 0 | 0 | 8 | 0 | 0 | 0 |   128 |  512 | 1024 | 2048,
-  1 | 0 | 4 | 0 | 16 | 0 | 0 | 0 | 256,
+  0 | 0 | 4 | 0 | 16 | 0 | 0 | 0 | 256,
   1 | 2 | 0 | 8 |  0 | 0 | 0 | 128,
  },/*
   {//Furtifon
@@ -569,7 +571,7 @@ dbUserMainDef cmdUserMainDefault =
   { 120000, 6000, 1500, 3000, 0, 0/*, 0, 0*/ }, //ressource
   -1, //Empire
   { }, //infos
-  { 0, 0, 0, 0, 0, 0, 0/*, 0*/ }, //Research
+  { 0, 0, 0, 0, 0, 0, 0, 0}, //Research
   { 100*65536, 100*65536, 100*65536 }, //readiness
   0, //home
   { }, //totalbuilding

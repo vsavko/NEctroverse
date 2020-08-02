@@ -187,7 +187,8 @@ char *RoundSpecName[ROUNDSPEC_NUMUSED] =
 "Exploration costs are thirded!",
 "All races have observe planet operation!",
 "Race can be changed every 24h!",
-"Galactic congress forbids destroying ancient heritage!"
+"Galactic congress forbids destroying ancient heritage!",
+"Market is closed!"
 };
 
 char *RoundSpecImage[ROUNDSPEC_NUMUSED] =
@@ -195,12 +196,14 @@ char *RoundSpecImage[ROUNDSPEC_NUMUSED] =
 "artimg19.gif",
 "artimg15.gif",
 "artimg16.gif",
-"artimg17.gif"
+"artimg17.gif",
+"eurosign.png"
 };
 
 int roundspec_define[ROUNDSPEC_NUMUSED] =
 { 
-0, 
+1, 
+1,
 0,
 0,
 1

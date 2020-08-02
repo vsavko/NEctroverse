@@ -261,7 +261,7 @@ int battle( int id, int fltid, int64_t *results )
   if( planetd.flags & CMD_PLANET_FLAGS_PORTAL )
     cover = 1.0;
   else
-    cover = battlePortalCoverage( defid, ( planetd.position >> 8 ) & 0xFFF, planetd.position >> 20, main2d.totalresearch[CMD_RESEARCH_CULTURE] );
+    cover = battlePortalCoverage( defid, ( planetd.position >> 8 ) & 0xFFF, planetd.position >> 20, main2d.totalresearch[CMD_RESEARCH_PORTALS] );
     
   a = specopForcefieldCalc( defid, fleetd.destid );
   if( a )

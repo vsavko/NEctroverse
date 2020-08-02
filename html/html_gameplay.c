@@ -2100,7 +2100,15 @@ void iohtmlFunc_market( ReplyDataPtr cnt )
 if( ( id = iohtmlIdentify( cnt, 1|2 ) ) < 0 )
   return;
  iohtmlBase( cnt, 1 );
-
+ 
+if (roundspec_define[ROUNDSPEC_MARKETCLOSED]){
+	 if( !( iohtmlHeader( cnt, id, &maind ) ) )
+		return;
+	iohtmlBodyInit( cnt, "Market" );
+	httpString(cnt, "Market is closed<br>");
+	iohtmlBodyEnd( cnt );
+	return;
+}
 
  pricestring = iohtmlVarsFind( cnt, "price" );
  quantitystring = iohtmlVarsFind( cnt, "quantity" );
