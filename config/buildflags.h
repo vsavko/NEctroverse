@@ -1,6 +1,9 @@
 #ifndef CORECONFIGS
 #define CORECONFIGS
 
+//if set to zero an email confirmation wont be sent to a user
+#define ENABLE_EMAIL_REGISTRATION 1
+
 /* This is a Linux kernel */
 #define LINUX 1
 
