@@ -523,14 +523,6 @@ void iohtmlFunc_guide( ReplyDataPtr cnt ) {
 iohtmlBase( cnt, 8 );
 iohtmlFunc_frontmenu( cnt, FMENU_GUIDE );
 
-//httpString( cnt, "<tr><td width=\"7%\">&nbsp;</td><td width=\"86%\" valign=\"top\">" );
-//httpString( cnt, "<table width=\"100%\" border=\"0\" cellpadding=\"2\" cellspacing=\"0\">" );
-
-//httpString( cnt, "<tr><td background=\"files?type=image&amp;name=ectro_16.jpg\" height=\"15\"><font color=\"#FFFFFF\" size=\"2\"><b>Guide</b></font></td></tr>" );
-//httpString( cnt, "<tr><td class=\"left\">" );
-
-
-
 settings = GetSetting( "HTTP Text" );
 sprintf( DIRCHECKER, "%s/guide.html", settings->string_value );
 if( stat( DIRCHECKER, &stdata ) != -1 ) {
@@ -549,21 +541,6 @@ if( stat( DIRCHECKER, &stdata ) != -1 ) {
 	}
 }
 
-
-httpString( cnt,"</div>");
-httpString( cnt,"<div class=\"display_box_content_right\"></div>");
-httpString( cnt,"</div>");
-httpString( cnt,"<div class=\"display_box_footer\">");
-httpString( cnt,"<div class=\"display_box_footer_left\"></div>");
-httpString( cnt,"<div class=\"display_box_footer_center\"></div>");
-httpString( cnt,"<div class=\"display_box_footer_right\"></div>");
-httpString( cnt,"</div>");
-httpString( cnt,"</div>");
-httpString( cnt,"</div>");
-
-
-//httpString( cnt, "</td></tr></table><br><br>" );
-//httpString( cnt, "</td><td width=\"7%\">&nbsp;</td></tr></table>" );
 iohtmlFunc_endhtml( cnt );
 return;
 }
@@ -1165,6 +1142,8 @@ if( race ) {
 	}
 	if( ( id = cmdExecNewUser( fbtemp[0], fbtemp[1], faction, email, currentIp ) ) < 0 ) {
 	#else
+	
+	#if ENABLE_EMAIL_REGISTRATION
 	if (confirmationCode != null){	//email code entered
 		if (strcmp(confirmationCode, tmpCode)!= 0){
 			
@@ -1213,7 +1192,7 @@ if( race ) {
 				tmpRegisteredIpPtr->tries += 1;
 				tmpRegisteredIpPtr->time = time( &now ); //update time from new try
 			}
-		
+			
 			httpPrintf( cnt, "<form action=\"%s\" method=\"POST\">", URLAppend( cnt, "register" ) );
 			httpPrintf( cnt, "<input type=\"hidden\" name=\"tmpCode\" value=\"%s\">", tmpCode );
 			httpString( cnt, "<br>Enter confirmation code<br><input type=\"text\" name=\"confirmationCode\"><br>" );
@@ -1226,8 +1205,19 @@ if( race ) {
 			httpString( cnt, "<br><input type=\"submit\" value=\"OK\"></form>" );
 			free(tmpCode);
 			goto END;
+			
 		}
 	}
+	#else
+	if( ( id = cmdExecNewUser( name, pass, faction, email, currentIp ) ) < 0 ) {
+		httpString( cnt, cmdErrorString ? cmdErrorString  : "Error encountered while registering user" );
+		httpString( cnt, "<br><br>" );
+		httpPrintf( cnt, "<a href=\"%s&amp;rule_agree=true\">Try Again.</a>", URLAppend( cnt, "register" ) );
+		goto END;
+	}
+	
+	#endif
+	
 	#endif
   	newd[0] = ticks.number;
 	newd[1] = CMD_NEWS_FLAGS_NEW;
